@@ -1,30 +1,11 @@
+// components/sections/InvestorPopupModal.js
 import { X, ChevronDown, Check } from "lucide-react";
 import { useEffect, useState } from "react";
-// Import getApps along with initializeApp
-import { initializeApp, getApps } from "firebase/app";
-import { getFirestore, collection, addDoc, query, where, getDocs } from "firebase/firestore";
+import { app, db } from '../../lib/firebase';
 import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "firebase/auth";
+import { getFirestore, collection, addDoc, query, where, getDocs } from "firebase/firestore";
 
-// --- Firebase Configuration and Initialization ---
-// The following global variables are provided by the canvas environment.
-// We check for their existence and provide fallbacks for local development.
-const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-
-// Initialize Firebase App only if no apps are already initialized.
-// This prevents the "duplicate-app" error in environments with hot-reloading.
-const firebaseApps = getApps();
-let app;
-if (!firebaseApps.length) {
-  app = initializeApp(firebaseConfig);
-} else {
-  app = firebaseApps[0];
-}
-const db = getFirestore(app);
-const auth = getAuth(app);
-
-// Custom Dropdown Component (unchanged)
+// Custom Dropdown (same as before)
 const CustomDropdown = ({ options, placeholder, value, onChange, className = "" }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -74,16 +55,15 @@ const InvestorPopupModal = ({ isOpen, onClose }) => {
     fullName: "",
     email: "",
     social: "",
-    investmentProfile: "", // New required field
+    investmentProfile: "",
     location: "",
     message: ""
   });
   const [errors, setErrors] = useState({});
-  const [submissionStatus, setSubmissionStatus] = useState("idle"); // idle, submitting, success, error
+  const [submissionStatus, setSubmissionStatus] = useState("idle");
   const [userId, setUserId] = useState(null);
   const [isAuthReady, setIsAuthReady] = useState(false);
 
-  // Define dropdown options
   const investmentProfileOptions = [
     "Angel Investor",
     "Micro VC",
@@ -111,17 +91,22 @@ const InvestorPopupModal = ({ isOpen, onClose }) => {
     "Other"
   ];
 
-  // --- Auth State Listener and Sign-In ---
+  // Provided globals fallback (keeps your previous logic)
+  const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+  const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    const firebaseAuth = getAuth(app);
+
+    const unsubscribe = onAuthStateChanged(firebaseAuth, async (user) => {
       if (user) {
         setUserId(user.uid);
       } else {
         try {
           if (initialAuthToken) {
-            await signInWithCustomToken(auth, initialAuthToken);
+            await signInWithCustomToken(firebaseAuth, initialAuthToken);
           } else {
-            await signInAnonymously(auth);
+            await signInAnonymously(firebaseAuth);
           }
         } catch (error) {
           console.error("Firebase sign-in error:", error);
@@ -132,87 +117,61 @@ const InvestorPopupModal = ({ isOpen, onClose }) => {
     return () => unsubscribe();
   }, []);
 
-  // Effect to manage body overflow when modal is open
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : "auto";
-    return () => {
-      document.body.style.overflow = "auto";
-    };
+    return () => { document.body.style.overflow = "auto"; };
   }, [isOpen]);
 
-  // Handle form input changes
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    // Clear the error for the field being updated
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: null }));
-    }
+    if (errors[field]) setErrors(prev => ({ ...prev, [field]: null }));
   };
 
-  // -----------------------------------------------------------------------------------------------------
-  // --- NEW: Business Email Validation Logic ---
-  // -----------------------------------------------------------------------------------------------------
-  // List of common personal email domains to reject.
   const personalEmailDomains = [
-    "gmail.com", "yahoo.com", "hotmail.com", "aol.com", "outlook.com", 
+    "gmail.com", "yahoo.com", "hotmail.com", "aol.com", "outlook.com",
     "icloud.com", "protonmail.com", "zoho.com", "yandex.com"
   ];
 
   const isBusinessEmail = (email) => {
     if (!email) return false;
     const domain = email.split('@')[1]?.toLowerCase();
-    // Check if the domain exists and is not in the list of personal domains.
     return domain && !personalEmailDomains.includes(domain);
   };
 
-  const isValidEmailFormat = (email) => {
-    return /\S+@\S+\.\S+/.test(email);
-  };
-  // -----------------------------------------------------------------------------------------------------
+  const isValidEmailFormat = (email) => /\S+@\S+\.\S+/.test(email);
 
-  // Function to check if the email already exists in Firestore
   const isEmailUnique = async (email) => {
     if (!isAuthReady) {
       console.error("isEmailUnique: Auth is not ready.");
-      return false; // Prevent Firestore calls before auth is ready
+      return false;
     }
     const q = query(collection(db, `artifacts/${appId}/public/data/investors`), where("email", "==", email));
     const querySnapshot = await getDocs(q);
     return querySnapshot.empty;
   };
 
-  // Validate all form fields
   const validateForm = async () => {
     const newErrors = {};
-    if (!formData.fullName.trim()) {
-      newErrors.fullName = "Full Name is required.";
-    }
+    if (!formData.fullName.trim()) newErrors.fullName = "Full Name is required.";
     if (!formData.email.trim()) {
       newErrors.email = "Email Address is required.";
     } else if (!isValidEmailFormat(formData.email)) {
       newErrors.email = "Please enter a valid email address.";
     } else if (!isBusinessEmail(formData.email)) {
-      // --- NEW: Check if the email is a business email. ---
       newErrors.email = "Please use a business email address.";
     } else if (!await isEmailUnique(formData.email)) {
       newErrors.email = "This email is already registered.";
     }
-    if (!formData.social.trim()) {
-      newErrors.social = "LinkedIn or X Profile is required.";
-    }
-    if (!formData.investmentProfile) {
-      newErrors.investmentProfile = "Investment Profile is required.";
-    }
+    if (!formData.social.trim()) newErrors.social = "LinkedIn or X Profile is required.";
+    if (!formData.investmentProfile) newErrors.investmentProfile = "Investment Profile is required.";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  // Handle form submission
   const handleSubmit = async () => {
     console.log("Attempting to submit form data...");
     setSubmissionStatus("submitting");
 
-    // Only proceed if auth state is ready
     if (!userId) {
       setErrors({ form: "Authentication not ready. Please try again." });
       setSubmissionStatus("error");
@@ -228,15 +187,13 @@ const InvestorPopupModal = ({ isOpen, onClose }) => {
     }
 
     try {
-      // Save data to Firestore in the public collection
       await addDoc(collection(db, `artifacts/${appId}/public/data/investors`), {
         ...formData,
         submittedAt: new Date(),
       });
       setSubmissionStatus("success");
       console.log("Form submission successful.");
-      
-      // Clear form data on success
+
       setFormData({
         fullName: "",
         email: "",
@@ -246,7 +203,6 @@ const InvestorPopupModal = ({ isOpen, onClose }) => {
         message: ""
       });
 
-      // You might want to close the modal after a brief delay on success
       setTimeout(() => {
         onClose();
         setSubmissionStatus("idle");
@@ -264,10 +220,7 @@ const InvestorPopupModal = ({ isOpen, onClose }) => {
   return (
     <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black bg-opacity-70 backdrop-blur-sm p-4">
       <div className="bg-neutral-900 text-white p-8 rounded-2xl w-full max-w-screen-lg relative shadow-2xl max-h-[90vh] overflow-y-auto scrollbar-hide">
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-neutral-400 hover:text-white transition-colors z-10"
-        >
+        <button onClick={onClose} className="absolute top-4 right-4 text-neutral-400 hover:text-white transition-colors z-10">
           <X size={24} />
         </button>
 
@@ -366,15 +319,13 @@ const InvestorPopupModal = ({ isOpen, onClose }) => {
             />
           </div>
 
-          {/* Privacy Notice */}
           <div>
             <p className="text-lg text-neutral-400 ">By submitting this form, you agree to be contacted regarding investment opportunities. We respect your privacy and will not share your information with third parties.</p>
           </div>
 
-          {/* Submission Feedback & Button */}
           {errors.form && <p className="text-red-300 text-xl text-center">{errors.form}</p>}
           {submissionStatus === "success" && <p className="text-white text-xl text-center">Submission successful!</p>}
-          
+
           <button
             type="button"
             onClick={handleSubmit}

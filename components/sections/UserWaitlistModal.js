@@ -1,12 +1,14 @@
+// components/sections/UserWaitlistModal.js
 import { X, ChevronDown, Check, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { initializeApp } from 'firebase/app';
-// We need to add query, where, and getDocs to check for unique emails
-import { getFirestore, collection, addDoc, query, where, getDocs } from 'firebase/firestore';
-import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
 
-// --- Custom Dropdown Component (No changes) ---
+// Import firebase helpers from lib
+import { app, db } from '../../lib/firebase';
+import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
+import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
+
+// --- Custom Dropdown Component ---
 const CustomDropdown = ({ options, placeholder, value, onChange, className = "" }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -61,79 +63,54 @@ const UserWaitlistModal = ({ isOpen, onClose }) => {
     howDidYouHear: "",
     mostExcitedAbout: ""
   });
-  
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
-  // New state for showing the share link
   const [showShareLink, setShowShareLink] = useState(false);
-  // New state to store the generated shareable link
   const [shareableLink, setShareableLink] = useState('');
-  // New state to store the referrer's ID if the user came from a referral link
   const [referrerId, setReferrerId] = useState(null);
 
   // Firebase state
-  const [db, setDb] = useState(null);
+  const [dbInstance, setDbInstance] = useState(null);
   const [auth, setAuth] = useState(null);
   const [isAuthReady, setIsAuthReady] = useState(false);
 
-  // --- Firebase Initialization and Auth Effect ---
   useEffect(() => {
-    // WARNING: It is not recommended to hardcode Firebase config in production apps.
-    // It's better to use environment variables or a secure backend to provide this configuration.
-    const firebaseConfig = {
-     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-     authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-     projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-     storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-     messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
-    };
-
+    // Use the shared app and db from lib/firebase
     try {
-      const app = initializeApp(firebaseConfig);
-      const firestoreDb = getFirestore(app);
       const firebaseAuth = getAuth(app);
-      
-      setDb(firestoreDb);
+      setDbInstance(db);
       setAuth(firebaseAuth);
 
-      // Authenticate user anonymously
+      // Authenticate user anonymously (or rely on existing session)
       onAuthStateChanged(firebaseAuth, (user) => {
         if (user) {
-          // User is signed in.
           setIsAuthReady(true);
           console.log("Firebase authenticated anonymously.");
         } else {
-          // User is signed out.
-          signInAnonymously(firebaseAuth).catch((error) => {
-            console.error("Anonymous sign-in error:", error);
+          signInAnonymously(firebaseAuth).catch((err) => {
+            console.error("Anonymous sign-in error:", err);
             setError("Could not connect to the server. Please try again later.");
           });
         }
       });
-
     } catch (e) {
-      console.error("Error initializing Firebase:", e);
+      console.error("Error initializing Firebase auth:", e);
       setError("Firebase configuration is invalid.");
     }
   }, []);
 
-  // Effect to check for referral ID in the URL on component mount
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const referralId = params.get('referralId');
-    if (referralId) {
-      setReferrerId(referralId);
-    }
+    const params = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
+    const referralId = params ? params.get('referralId') : null;
+    if (referralId) setReferrerId(referralId);
   }, []);
 
-  // Regex function to validate email format
   const isValidEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
-
 
   const userTypeOptions = [
     "Gamer - I want to play and earn",
@@ -154,41 +131,33 @@ const UserWaitlistModal = ({ isOpen, onClose }) => {
     "Direct Link"
   ];
 
-  // Effect to manage body overflow when modal is open
   useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : 'auto';
-    return () => {
-      document.body.style.overflow = 'auto';
-    };
+    return () => { document.body.style.overflow = 'auto'; };
   }, [isOpen]);
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  // New function to handle closing the modal and resetting states
   const handleClose = () => {
     setIsSuccess(false);
-    setShowShareLink(false); // Reset share link state
-    setShareableLink(''); // Reset shareable link
+    setShowShareLink(false);
+    setShareableLink('');
     onClose();
   };
 
-  // --- Handle Form Submission ---
   const handleSubmit = async () => {
-    // Prevent submission if not ready or already submitting
     if (!isAuthReady || isSubmitting) {
-        if(!isAuthReady) console.error("Authentication not ready.");
-        return;
+      if(!isAuthReady) console.error("Authentication not ready.");
+      return;
     }
-    
-    // 1. Validate required fields
+
     if (!formData.fullName || !formData.emailAddress || !formData.interestedAs) {
       setError("Please fill out all required fields (*).");
       return;
     }
-    
-    // 2. Validate email format
+
     if (!isValidEmail(formData.emailAddress)) {
       setError("Please enter a valid email address.");
       return;
@@ -198,11 +167,12 @@ const UserWaitlistModal = ({ isOpen, onClose }) => {
     setIsSubmitting(true);
 
     try {
-      const appId = 'local-7c55a'; // Using projectId as appId for collection path
+      // appId / collection path example – adapt as needed
+      const appId = 'local-7c55a';
       const collectionPath = `artifacts/${appId}/public/data/waitlistUsers`;
-      const waitlistCollection = collection(db, collectionPath);
-      
-      // 3. Check for duplicate email addresses
+      const waitlistCollection = collection(dbInstance, collectionPath);
+
+      // Check for duplicate email
       const q = query(waitlistCollection, where("emailAddress", "==", formData.emailAddress));
       const querySnapshot = await getDocs(q);
 
@@ -211,28 +181,21 @@ const UserWaitlistModal = ({ isOpen, onClose }) => {
         setIsSubmitting(false);
         return;
       }
-      
-      // Data to be saved to Firestore, including the referrerId if present
+
       const submissionData = {
-          ...formData,
-          submittedAt: new Date().toISOString(), // Add a server-side timestamp
-          // Add the referrerId to the document if it exists
-          ...(referrerId && { referredBy: referrerId })
+        ...formData,
+        submittedAt: new Date().toISOString(),
+        ...(referrerId && { referredBy: referrerId })
       };
 
-      // Add a new document with a generated id.
       const docRef = await addDoc(waitlistCollection, submissionData);
-      console.log("Document successfully written with ID: ", docRef.id);
-      
-      // Generate the shareable link using the document ID as a referral ID
-      // This URL should be the actual website URL. Using a placeholder for now.
+      console.log("Document written with ID: ", docRef.id);
+
       const generatedLink = `https://your-website.com/?referralId=${docRef.id}`;
       setShareableLink(generatedLink);
-      
-      // Set success state instead of closing the modal
+
       setIsSuccess(true);
-      
-      // Reset form data after successful submission
+
       setFormData({
         fullName: "",
         emailAddress: "",
@@ -252,17 +215,14 @@ const UserWaitlistModal = ({ isOpen, onClose }) => {
 
   if (!isOpen) return null;
 
-  // Function to handle copying the share link to the clipboard
   const handleCopyLink = () => {
-    // Using document.execCommand('copy') as navigator.clipboard might not be available in all environments
     const tempInput = document.createElement('input');
     document.body.appendChild(tempInput);
     tempInput.value = shareableLink;
     tempInput.select();
     document.execCommand('copy');
     document.body.removeChild(tempInput);
-    // Optionally, show a message that the link was copied
-    alert('Link copied to clipboard!'); // Using a non-modal alert here as it is not a critical error message
+    alert('Link copied to clipboard!');
   };
 
   return (
@@ -276,7 +236,6 @@ const UserWaitlistModal = ({ isOpen, onClose }) => {
         </button>
 
         {!isSuccess ? (
-          // --- Main Waitlist Form UI ---
           <>
             <div className="mb-6 text-center">
               <div className="inline-flex items-center justify-center mb-4">
@@ -376,12 +335,8 @@ const UserWaitlistModal = ({ isOpen, onClose }) => {
                 />
               </div>
 
-              
-              
-              {/* Error Message */}
               {error && <p className="text-red-400 text-center">{error}</p>}
 
-              {/* Join Button */}
               <button
                 type="submit"
                 disabled={isSubmitting || !isAuthReady}
@@ -390,14 +345,12 @@ const UserWaitlistModal = ({ isOpen, onClose }) => {
                 {isSubmitting ? 'Submitting...' : 'Join the Waitlist'}
               </button>
 
-              {/* Privacy Notice */}
               <p className="text-lg text-neutral-400 text-center">
                 We respect your privacy. You can unsubscribe at any time and we'll never share your information.
               </p>
             </form>
           </>
         ) : (
-          // --- Success Message Pop-up UI ---
           <div className="flex flex-col items-center justify-center py-10 px-6 text-center">
             <CheckCircle size={96} className="text-white mb-6 animate-pulse" />
             <h2 className="text-4xl font-bold text-white mb-2">Success!</h2>
@@ -413,12 +366,12 @@ const UserWaitlistModal = ({ isOpen, onClose }) => {
             >
               Continue
             </button>
-            {/* The Elite Member section has been moved to this location */}
+
             <div className="text-center mt-6 mb-4">
               <h3 className="text-xl font-bold text-white mb-2">
                 Bring your squad — become an Elite Member of CoreGameX and unlock early access & exclusive rewards.
               </h3>
-              
+
               <ul className="text-sm text-neutral-300 space-y-1 text-left inline-block">
                 <li className="flex text-lg items-center gap-2">
                   <div className="w-1.5 h-1.5 bg-neutral-400 rounded-full"></div>
@@ -436,10 +389,10 @@ const UserWaitlistModal = ({ isOpen, onClose }) => {
                   <div className="w-1.5 h-1.5 bg-neutral-400 rounded-full"></div>
                   Earn badges & Token perks and more.
                 </li>
-                
+
               </ul>
             </div>
-            {/* Share with your friends section */}
+
             <div className="mt-6 w-full max-w-lg">
               {!showShareLink ? (
                 <button
