@@ -1,12 +1,30 @@
 // components/sections/InvestorPopupModal.js
 import { X, ChevronDown, Check } from "lucide-react";
 import { useEffect, useState } from "react";
-import { app, db } from '../../lib/firebase';
-import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "firebase/auth";
-import { getFirestore, collection, addDoc, query, where, getDocs } from "firebase/firestore";
+import { app, db } from "../../lib/firebase";
+import {
+  getAuth,
+  signInWithCustomToken,
+  signInAnonymously,
+  onAuthStateChanged,
+} from "firebase/auth";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  query,
+  where,
+  getDocs,
+} from "firebase/firestore";
 
 // Custom Dropdown (same as before)
-const CustomDropdown = ({ options, placeholder, value, onChange, className = "" }) => {
+const CustomDropdown = ({
+  options,
+  placeholder,
+  value,
+  onChange,
+  className = "",
+}) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleSelect = (option) => {
@@ -26,7 +44,9 @@ const CustomDropdown = ({ options, placeholder, value, onChange, className = "" 
         </span>
         <ChevronDown
           size={18}
-          className={`text-neutral-200 transition-transform ${isOpen ? "rotate-180" : ""}`}
+          className={`text-neutral-200 transition-transform ${
+            isOpen ? "rotate-180" : ""
+          }`}
         />
       </button>
 
@@ -57,7 +77,7 @@ const InvestorPopupModal = ({ isOpen, onClose }) => {
     social: "",
     investmentProfile: "",
     location: "",
-    message: ""
+    message: "",
   });
   const [errors, setErrors] = useState({});
   const [submissionStatus, setSubmissionStatus] = useState("idle");
@@ -72,7 +92,7 @@ const InvestorPopupModal = ({ isOpen, onClose }) => {
     "Growth Stage",
     "Late Stage",
     "Strategic Investor",
-    "Family Office"
+    "Family Office",
   ];
 
   const locationOptions = [
@@ -88,14 +108,20 @@ const InvestorPopupModal = ({ isOpen, onClose }) => {
     "Japan",
     "Australia",
     "Israel",
-    "Other"
+    "Other",
   ];
 
   // Provided globals fallback (keeps your previous logic)
-  const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-  const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+  const appId = typeof __app_id !== "undefined" ? __app_id : "default-app-id";
+  const initialAuthToken =
+    typeof __initial_auth_token !== "undefined" ? __initial_auth_token : null;
 
   useEffect(() => {
+    // Only run Firebase auth on the client side
+    if (typeof window === "undefined") {
+      return;
+    }
+
     const firebaseAuth = getAuth(app);
 
     const unsubscribe = onAuthStateChanged(firebaseAuth, async (user) => {
@@ -119,22 +145,31 @@ const InvestorPopupModal = ({ isOpen, onClose }) => {
 
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : "auto";
-    return () => { document.body.style.overflow = "auto"; };
+    return () => {
+      document.body.style.overflow = "auto";
+    };
   }, [isOpen]);
 
   const handleInputChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    if (errors[field]) setErrors(prev => ({ ...prev, [field]: null }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (errors[field]) setErrors((prev) => ({ ...prev, [field]: null }));
   };
 
   const personalEmailDomains = [
-    "gmail.com", "yahoo.com", "hotmail.com", "aol.com", "outlook.com",
-    "icloud.com", "protonmail.com", "zoho.com", "yandex.com"
+    "gmail.com",
+    "yahoo.com",
+    "hotmail.com",
+    "aol.com",
+    "outlook.com",
+    "icloud.com",
+    "protonmail.com",
+    "zoho.com",
+    "yandex.com",
   ];
 
   const isBusinessEmail = (email) => {
     if (!email) return false;
-    const domain = email.split('@')[1]?.toLowerCase();
+    const domain = email.split("@")[1]?.toLowerCase();
     return domain && !personalEmailDomains.includes(domain);
   };
 
@@ -145,25 +180,31 @@ const InvestorPopupModal = ({ isOpen, onClose }) => {
       console.error("isEmailUnique: Auth is not ready.");
       return false;
     }
-    const q = query(collection(db, `artifacts/${appId}/public/data/investors`), where("email", "==", email));
+    const q = query(
+      collection(db, `artifacts/${appId}/public/data/investors`),
+      where("email", "==", email)
+    );
     const querySnapshot = await getDocs(q);
     return querySnapshot.empty;
   };
 
   const validateForm = async () => {
     const newErrors = {};
-    if (!formData.fullName.trim()) newErrors.fullName = "Full Name is required.";
+    if (!formData.fullName.trim())
+      newErrors.fullName = "Full Name is required.";
     if (!formData.email.trim()) {
       newErrors.email = "Email Address is required.";
     } else if (!isValidEmailFormat(formData.email)) {
       newErrors.email = "Please enter a valid email address.";
     } else if (!isBusinessEmail(formData.email)) {
       newErrors.email = "Please use a business email address.";
-    } else if (!await isEmailUnique(formData.email)) {
+    } else if (!(await isEmailUnique(formData.email))) {
       newErrors.email = "This email is already registered.";
     }
-    if (!formData.social.trim()) newErrors.social = "LinkedIn or X Profile is required.";
-    if (!formData.investmentProfile) newErrors.investmentProfile = "Investment Profile is required.";
+    if (!formData.social.trim())
+      newErrors.social = "LinkedIn or X Profile is required.";
+    if (!formData.investmentProfile)
+      newErrors.investmentProfile = "Investment Profile is required.";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -200,14 +241,13 @@ const InvestorPopupModal = ({ isOpen, onClose }) => {
         social: "",
         investmentProfile: "",
         location: "",
-        message: ""
+        message: "",
       });
 
       setTimeout(() => {
         onClose();
         setSubmissionStatus("idle");
       }, 2000);
-
     } catch (e) {
       console.error("Error adding document: ", e);
       setSubmissionStatus("error");
@@ -220,13 +260,19 @@ const InvestorPopupModal = ({ isOpen, onClose }) => {
   return (
     <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black bg-opacity-70 backdrop-blur-sm p-4">
       <div className="bg-neutral-900 text-white p-8 rounded-2xl w-full max-w-screen-lg relative shadow-2xl max-h-[90vh] overflow-y-auto scrollbar-hide">
-        <button onClick={onClose} className="absolute top-4 right-4 text-neutral-400 hover:text-white transition-colors z-10">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-neutral-400 hover:text-white transition-colors z-10"
+        >
           <X size={24} />
         </button>
 
         <div className="mb-6">
           <h2 className="text-3xl font-bold mb-2">Join Our Investor Network</h2>
-          <p className="text-neutral-300 text-lg">Connect with us to explore investment opportunities and stay updated on our latest ventures.</p>
+          <p className="text-neutral-300 text-lg">
+            Connect with us to explore investment opportunities and stay updated
+            on our latest ventures.
+          </p>
         </div>
 
         <div className="space-y-5">
@@ -241,9 +287,13 @@ const InvestorPopupModal = ({ isOpen, onClose }) => {
               value={formData.fullName}
               onChange={(e) => handleInputChange("fullName", e.target.value)}
               placeholder="e.g. John Smith"
-              className={`w-full p-3 rounded !bg-neutral-800 border ${errors.fullName ? "border-red-500" : "border-neutral-700"} focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent transition-all placeholder-neutral-500`}
+              className={`w-full p-3 rounded !bg-neutral-800 border ${
+                errors.fullName ? "border-red-500" : "border-neutral-700"
+              } focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent transition-all placeholder-neutral-500`}
             />
-            {errors.fullName && <p className="text-red-400 text-sm mt-1">{errors.fullName}</p>}
+            {errors.fullName && (
+              <p className="text-red-400 text-sm mt-1">{errors.fullName}</p>
+            )}
           </div>
 
           {/* Email Address */}
@@ -257,9 +307,13 @@ const InvestorPopupModal = ({ isOpen, onClose }) => {
               value={formData.email}
               onChange={(e) => handleInputChange("email", e.target.value)}
               placeholder="john@venture-capital.com"
-              className={`w-full p-3 rounded !bg-neutral-800 border ${errors.email ? "border-red-500" : "border-neutral-700"} focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent transition-all placeholder-neutral-500`}
+              className={`w-full p-3 rounded !bg-neutral-800 border ${
+                errors.email ? "border-red-500" : "border-neutral-700"
+              } focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent transition-all placeholder-neutral-500`}
             />
-            {errors.email && <p className="text-red-400 text-sm mt-1">{errors.email}</p>}
+            {errors.email && (
+              <p className="text-red-400 text-sm mt-1">{errors.email}</p>
+            )}
           </div>
 
           {/* LinkedIn / Twitter */}
@@ -273,9 +327,13 @@ const InvestorPopupModal = ({ isOpen, onClose }) => {
               value={formData.social}
               onChange={(e) => handleInputChange("social", e.target.value)}
               placeholder="https://linkedin.com/in/johnsmith or https://x.com/johnsmith"
-              className={`w-full p-3 rounded !bg-neutral-800 border ${errors.social ? "border-red-500" : "border-neutral-700"} focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent transition-all placeholder-neutral-500`}
+              className={`w-full p-3 rounded !bg-neutral-800 border ${
+                errors.social ? "border-red-500" : "border-neutral-700"
+              } focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent transition-all placeholder-neutral-500`}
             />
-            {errors.social && <p className="text-red-400 text-sm mt-1">{errors.social}</p>}
+            {errors.social && (
+              <p className="text-red-400 text-sm mt-1">{errors.social}</p>
+            )}
           </div>
 
           {/* Investment Profile */}
@@ -287,9 +345,15 @@ const InvestorPopupModal = ({ isOpen, onClose }) => {
               options={investmentProfileOptions}
               placeholder="Select your typical investment range"
               value={formData.investmentProfile}
-              onChange={(value) => handleInputChange("investmentProfile", value)}
+              onChange={(value) =>
+                handleInputChange("investmentProfile", value)
+              }
             />
-            {errors.investmentProfile && <p className="text-red-400 text-sm mt-1">{errors.investmentProfile}</p>}
+            {errors.investmentProfile && (
+              <p className="text-red-400 text-sm mt-1">
+                {errors.investmentProfile}
+              </p>
+            )}
           </div>
 
           {/* Location */}
@@ -320,24 +384,36 @@ const InvestorPopupModal = ({ isOpen, onClose }) => {
           </div>
 
           <div>
-            <p className="text-lg text-neutral-400 ">By submitting this form, you agree to be contacted regarding investment opportunities. We respect your privacy and will not share your information with third parties.</p>
+            <p className="text-lg text-neutral-400 ">
+              By submitting this form, you agree to be contacted regarding
+              investment opportunities. We respect your privacy and will not
+              share your information with third parties.
+            </p>
           </div>
 
-          {errors.form && <p className="text-red-300 text-xl text-center">{errors.form}</p>}
-          {submissionStatus === "success" && <p className="text-white text-xl text-center">Submission successful!</p>}
+          {errors.form && (
+            <p className="text-red-300 text-xl text-center">{errors.form}</p>
+          )}
+          {submissionStatus === "success" && (
+            <p className="text-white text-xl text-center">
+              Submission successful!
+            </p>
+          )}
 
           <button
             type="button"
             onClick={handleSubmit}
             disabled={submissionStatus === "submitting"}
             className={`w-full bg-gradient-to-r from-neutral-200 to-gray-300 text-neutral-800 font-semibold py-3 px-6 rounded-2xl transition-all duration-100 shadow-lg
-              ${submissionStatus === "submitting" 
-                ? "opacity-50 cursor-not-allowed" 
-                : "hover:from-neutral-300 hover:to-gray-400 transform active:scale-[0.98]"
-              }`
-            }
+              ${
+                submissionStatus === "submitting"
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:from-neutral-300 hover:to-gray-400 transform active:scale-[0.98]"
+              }`}
           >
-            {submissionStatus === "submitting" ? "Submitting..." : "Submit Investment Interest"}
+            {submissionStatus === "submitting"
+              ? "Submitting..."
+              : "Submit Investment Interest"}
           </button>
         </div>
       </div>
