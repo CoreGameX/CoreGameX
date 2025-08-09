@@ -8,7 +8,7 @@ export default function MyAssets() {
     const singleAssets = [
         {
             id: 1,
-            image: '/assets/images/box-item/card-item-20.jpg',
+            image: '/assets/images/box-item/collectionPack/collection-01.jpg',
             title: '3D Preview Model',
             user: 'Alex Johnson',
             category: '3D Model',
@@ -18,8 +18,8 @@ export default function MyAssets() {
         },
         {
             id: 2,
-            image: '/assets/images/box-item/card-item-21.jpg',
-            title: 'Futuristic Car Design',
+            image: '/assets/images/box-item/discoverItems/Futuristic Bike.png',
+            title: 'Futuristic Bike Design',
             user: 'Sarah Chen',
             category: '3D Model',
             price: '$45.00',
@@ -28,7 +28,7 @@ export default function MyAssets() {
         },
         {
             id: 3,
-            image: '/assets/images/box-item/card-item-22.jpg',
+            image: '/assets/images/box-item/featuredSlider/Ocean Shader Toolkit.png',
             title: 'Abstract Art Collection',
             user: 'Mike Rodriguez',
             category: 'Digital Art',
@@ -38,7 +38,7 @@ export default function MyAssets() {
         },
         {
             id: 4,
-            image: '/assets/images/box-item/card-item-23.jpg',
+            image: '/assets/images/box-item/discoverItems/Sci-fiWeaponFXSystem.png',
             title: 'Cyberpunk Environment',
             user: 'Emma Taylor',
             category: '3D Environment',
@@ -48,7 +48,7 @@ export default function MyAssets() {
         },
         {
             id: 5,
-            image: '/assets/images/box-item/card-item-24.jpg',
+            image: '/assets/images/box-item/featuredSlider/robotic arm.png',
             title: 'Character Animation Set',
             user: 'David Kim',
             category: 'Animation',
@@ -58,7 +58,7 @@ export default function MyAssets() {
         },
         {
             id: 20,
-            image: '/assets/images/box-item/card-item-23.jpg',
+            image: '/assets/images/box-item/featuredSlider/Galaxy Back Bling.png',
             title: 'Cyberpunk Environment',
             user: 'Emma Taylor',
             category: '3D Environment',
@@ -68,7 +68,7 @@ export default function MyAssets() {
         },
         {
             id: 21,
-            image: '/assets/images/box-item/card-item-24.jpg',
+            image: '/assets/images/box-item/titleSlider1/MagicalFXOrbPack.png',
             title: 'Character Animation Set',
             user: 'David Kim',
             category: 'Animation',
@@ -78,7 +78,7 @@ export default function MyAssets() {
         },
         {
             id: 22,
-            image: '/assets/images/box-item/card-item-24.jpg',
+            image: '/assets/images/box-item/featuredSlider/Neon Racer Car.png',
             title: 'Character Animation Set',
             user: 'David Kim',
             category: 'Animation',
@@ -91,7 +91,7 @@ export default function MyAssets() {
     const collectionPack = [
         {
             id: 6,
-            image: '/assets/images/box-item/card-item-25.jpg',
+            image: '/assets/images/box-item/featuredSlider/AI Enemy Pack.png',
             title: 'Minimalist Icons Pack',
             user: 'Lisa Wang',
             category: 'UI/UX',
@@ -102,7 +102,7 @@ export default function MyAssets() {
         },
         {
             id: 7,
-            image: '/assets/images/box-item/card-item-26.jpg',
+            image: '/assets/images/box-item/featuredSlider/Fantasy Castle Builder.png',
             title: 'Fantasy Weapon Collection',
             user: 'John Martinez',
             category: '3D Model',
@@ -113,7 +113,7 @@ export default function MyAssets() {
         },
         {
             id: 8,
-            image: '/assets/images/box-item/card-item-27.jpg',
+            image: '/assets/images/box-item/featuredSlider/Galaxy Back Bling.png',
             title: 'Space Station Interior',
             user: 'Rachel Green',
             category: '3D Environment',
@@ -124,7 +124,7 @@ export default function MyAssets() {
         },
         {
             id: 9,
-            image: '/assets/images/box-item/card-item-28.jpg',
+            image: '/assets/images/box-item/featuredSlider/Post-Apocalyptic Armor.png',
             title: 'Vintage Car Models',
             user: 'Tom Wilson',
             category: '3D Model',
@@ -135,7 +135,7 @@ export default function MyAssets() {
         },
         {
             id: 10,
-            image: '/assets/images/box-item/card-item-28.jpg',
+            image: '/assets/images/box-item/featuredSlider/Shadow Sniper Pack.png',
             title: 'Vintage Car Models',
             user: 'Tom Wilson',
             category: '3D Model',
@@ -146,7 +146,7 @@ export default function MyAssets() {
         },
         {
             id: 11,
-            image: '/assets/images/box-item/card-item-28.jpg',
+            image: '/assets/images/box-item/featuredSlider/Neon Racer Car.png',
             title: 'Vintage Car Models',
             user: 'Tom Wilson',
             category: '3D Model',
@@ -157,7 +157,7 @@ export default function MyAssets() {
         },
         {
             id: 12,
-            image: '/assets/images/box-item/card-item-28.jpg',
+            image: '/assets/images/box-item/featuredSlider/NetherParticleFXPack.png',
             title: 'Vintage Car Models',
             user: 'Tom Wilson',
             category: '3D Model',

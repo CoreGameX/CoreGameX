@@ -31,7 +31,7 @@ export default function Home() {
                                         </div>
                                     </fieldset>
                                     <div className="btn-submit mb-30">
-                                        <Link href="/market" className="tf-button style-1 h50 w-100" type="submit">Login<i className="icon-arrow-up-right2" /></Link>
+                                        <Link href="/" className="tf-button style-1 h50 w-100" type="submit">Login<i className="icon-arrow-up-right2" /></Link>
                                     </div>
                                 </form>
                                 <div className="other">or continue</div>

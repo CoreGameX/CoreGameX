@@ -24,7 +24,7 @@ const SignUpFlow = () => {
         confirmPassword: '',
         agreeTerms: false,
         userType: '',
-        profileImage: '',
+        profileImage: 'https://tse4.mm.bing.net/th/id/OIP.tX36supoUyT_GOZtBHrQJgHaHa?pid=Api&P=0&h=180',
         shortIntro: '',
         socialLinks: {
           twitter: '',
@@ -101,7 +101,7 @@ const SignUpFlow = () => {
     dispatch(setUserDataToStore(userData));
     nextStep();
     setTimeout(() => {
-      window.location.href = '/profile';
+      window.location.href = '/dashboard';
       console.log("data store succesfully")
     }, 2000);
   };
