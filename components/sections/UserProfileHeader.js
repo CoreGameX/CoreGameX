@@ -38,7 +38,7 @@ export default function ProfileHeader({ userData }) {
           <img
             src={profileImage}
             alt="Profile preview"
-            className="max-w-full max-h-screen object-contain rounded-lg"
+            className="min-w-[350px] max-w-full max-h-screen object-contain rounded-lg"
             onClick={(e) => e.stopPropagation()}
           />
         </div>
@@ -59,7 +59,7 @@ export default function ProfileHeader({ userData }) {
               <div className="flex-shrink-0">
                 <div className="w-42 sm:w-60 aspect-square rounded-[16px] overflow-hidden bg-gradient-to-br from-neutral-600 to-neutral-700 shadow-lg">
                   <img
-                    src={profileImage || '/assets/images/box-item/card-item-12.jpg'}
+                    src={profileImage || 'https://tse4.mm.bing.net/th/id/OIP.tX36supoUyT_GOZtBHrQJgHaHa?pid=Api&P=0&h=180'}
                     alt="Dony Herrera"
                     className="w-full h-full object-cover cursor-pointer"
                     onClick={() => setShowImageModal(true)}

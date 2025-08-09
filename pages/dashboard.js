@@ -2,14 +2,14 @@ import ProfileNav from "@/components/layout/ProfileNav";
 import Analytics from "@/components/sections/Analytics";
 import MyAssets from "@/components/sections/MyAssets";
 import SalesTransactions from "@/components/sections/SalesTransactions";
-import SidebarDashboard from "@/components/sections/SidebarDashboard.js";
+import SidebarDashboard from "@/components/sections/SidebarDashboard";
 import { setUserDataToStore } from "@/components/store/profileDataSlice";
 import { setActiveItem } from "@/components/store/dashboardSlice";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/router";
 
-const Profile = () => {
+const Dashboard = () => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const router = useRouter()
 
@@ -41,8 +41,8 @@ const Profile = () => {
     };
 
     const renderPage = (title, description) => (
-        <div className="flex-1 p-4 md:p-10 bg-neutral-950 scroll-smooth">
-            <div className="text-center flex items-center justify-center flex-col lg:ml-96 min-h-[200vh] scroll-smooth scrollbar-hide">
+        <div className="flex-1 p-4 md:p-10 bg-neutral-950 scroll-smooth ">
+            <div className="text-center flex items-center justify-center flex-col lg:ml-96 min-h-[90vh] scroll-smooth scrollbar-hide">
                 <h1 className="text-3xl font-bold text-neutral-100 mb-4 mt-16 md:mt-0">
                     {title}
                 </h1>
@@ -109,4 +109,4 @@ const Profile = () => {
     );
 };
 
-export default Profile;
+export default Dashboard;

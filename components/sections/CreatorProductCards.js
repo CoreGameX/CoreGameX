@@ -5,108 +5,72 @@ const mockProducts = [
     {
         id: 1,
         title: "creator serpentine",
-        image: "/assets/images/box-item/card-item-35.jpg",
+        image: "/assets/images/box-item/collectionPack/collection-01.jpg",
         creator: "Kristin Watson",
-        avatar: "/assets/images/avatar/avatar-box-01.jpg",
+        avatar: "/assets/images/avatar/avatar-box-11.png",
         price: "0.34",
         authorLink: "/author-2"
     },
     {
         id: 2,
         title: "Vintage spark plug",
-        image: "/assets/images/box-item/card-item-36.jpg",
+        image: "/assets/images/box-item/collectionPack/collection-02.jpg",
         creator: "James Brown",
-        avatar: "/assets/images/avatar/avatar-box-02.jpg",
+        avatar: "/assets/images/avatar/avatar-box-07.png",
         price: "0.42",
         authorLink: "/author-2"
     },
     {
         id: 3,
         title: "Chrome engine cover",
-        image: "/assets/images/box-item/card-item-37.jpg",
+        image: "/assets/images/box-item/collectionPack/collection-03.jpg",
         creator: "Alice Johnson",
-        avatar: "/assets/images/avatar/avatar-box-03.jpg",
+        avatar: "/assets/images/avatar/avatar-box-06.png",
         price: "1.12",
         authorLink: "/author-3"
     },
     {
         id: 4,
         title: "High performance",
-        image: "/assets/images/box-item/card-item-38.jpg",
+        image: "/assets/images/box-item/collectionPack/collection-04.jpg",
         creator: "Ethan Hunt",
-        avatar: "/assets/images/avatar/avatar-box-04.jpg",
+        avatar: "/assets/images/avatar/avatar-box-05.png",
         price: "0.76",
         authorLink: "/author-4"
     },
     {
         id: 5,
         title: "Dayco serpentine belt",
-        image: "/assets/images/box-item/card-item-35.jpg",
+        image: "/assets/images/box-item/collectionPack/collection-05.jpg",
         creator: "Kristin Watson",
-        avatar: "/assets/images/avatar/avatar-box-01.jpg",
+        avatar: "/assets/images/avatar/avatar-box-04.png",
         price: "0.34",
         authorLink: "/author-2"
     },
     {
         id: 6,
         title: "Vintage spark plug",
-        image: "/assets/images/box-item/card-item-36.jpg",
+        image: "/assets/images/box-item/collectionPack/collection-04.jpg",
         creator: "James Brown",
-        avatar: "/assets/images/avatar/avatar-box-02.jpg",
+        avatar: "/assets/images/avatar/avatar-box-02.png",
         price: "0.42",
         authorLink: "/author-2"
     },
     {
         id: 7,
         title: "Chrome engine cover",
-        image: "/assets/images/box-item/card-item-37.jpg",
+        image: "/assets/images/box-item/collectionPack/collection-01.jpg",
         creator: "Alice Johnson",
-        avatar: "/assets/images/avatar/avatar-box-03.jpg",
+        avatar: "/assets/images/avatar/avatar-box-03.png",
         price: "1.12",
         authorLink: "/author-3"
     },
     {
         id: 8,
         title: "High performance",
-        image: "/assets/images/box-item/card-item-38.jpg",
+        image: "/assets/images/box-item/collectionPack/collection-02.jpg",
         creator: "Ethan Hunt",
-        avatar: "/assets/images/avatar/avatar-box-04.jpg",
-        price: "0.76",
-        authorLink: "/author-4"
-    },
-    {
-        id: 9,
-        title: "Dayco serpentine belt",
-        image: "/assets/images/box-item/card-item-35.jpg",
-        creator: "Kristin Watson",
-        avatar: "/assets/images/avatar/avatar-box-01.jpg",
-        price: "0.34",
-        authorLink: "/author-2"
-    },
-    {
-        id: 10,
-        title: "Vintage spark plug",
-        image: "/assets/images/box-item/card-item-36.jpg",
-        creator: "James Brown",
-        avatar: "/assets/images/avatar/avatar-box-02.jpg",
-        price: "0.42",
-        authorLink: "/author-2"
-    },
-    {
-        id: 11,
-        title: "Chrome engine cover",
-        image: "/assets/images/box-item/card-item-37.jpg",
-        creator: "Alice Johnson",
-        avatar: "/assets/images/avatar/avatar-box-03.jpg",
-        price: "1.12",
-        authorLink: "/author-3"
-    },
-    {
-        id: 12,
-        title: "High performance",
-        image: "/assets/images/box-item/card-item-38.jpg",
-        creator: "Ethan Hunt",
-        avatar: "/assets/images/avatar/avatar-box-04.jpg",
+        avatar: "/assets/images/avatar/avatar-box-01.png",
         price: "0.76",
         authorLink: "/author-4"
     }

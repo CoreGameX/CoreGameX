@@ -2,7 +2,7 @@ import React from 'react'
 
 function GameEconomy() {
     return (
-        <div className='my-28 flex flex-col gap-10  items-center p-24  bg-black text-white relative overflow-hidden'>
+        <div className='my-4 md:my-32 flex flex-col gap-10  items-center p-2 md:p-8  bg-black text-white relative overflow-hidden'>
 
             <div className='p-8'>
                 <div className='flex flex-col lg:flex-row items-center gap-12 lg:gap-24 max-w-screen-lg mx-auto'>
